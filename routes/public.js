@@ -145,7 +145,7 @@ async function sendData(){
   // 记录发送情况，取得sendID
   sqlstr = "updatePumpSendInfo";
   let param = {ID: 0, qty:0, status:0, msg:msg};
-  //console.log("params:", params);
+  // console.log("params:", param);
   await db.excuteProc(sqlstr, param, async function(err, data0){
     if (err) {
       console.log(err);
@@ -213,20 +213,20 @@ async function sendData(){
 // │  └──────────── 分，取值：0 - 59
 // └─────────────── 秒，取值：0 - 59（可选）
 // 当前时间的秒值为 10 时执行任务，如：2018-7-8 13:25:10
-/*
-const rule = new schedule.RecurrenceRule();
-rule.second = 10; // 每隔10秒执行一次
 
-const job = schedule.scheduleJob({rule: '/10 * * * * *' }, async function(){
-  await readPLCData();
-  console.log("scheduleJob log:", new Date());
+// const rule = new schedule.RecurrenceRule();
+// rule.second = 30; // 每隔30秒执行一次
+/*
+const job = schedule.scheduleJob({rule: '/30 * * * * *' }, async function(){
+  let re = await sendData();
+  console.log("scheduleJob log:", re, new Date());
 });
 */
 setInterval(async function() {
   // 每隔一段时间执行的代码
   let re = await sendData();
   // let re = await getShipList();
-  // console.log("scheduleJob log:", re, new Date());
+  console.log("scheduleJob log:", re, new Date());
 }, 1000 * 60);
 
 module.exports = router;
