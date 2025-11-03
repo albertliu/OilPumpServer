@@ -8,15 +8,13 @@ const path = require('path');
 //const jimp= require("jimp");
 const { NetworkAuthenticationRequire } = require('http-errors');
 const shell = require('shelljs');
-// const ReadlineParser = SerialPort.parsers.Readline;
 var downloadHome = './users/public/';
 
 const ip = 'https://fxpt.fxcw.com:8023';
-const url = ip + '/gatewayapi/fxcw/energyConsumptionData/add';
+const url = ip + '/gatewayapi/fxcw/energyConsumptionData/add1';
 const url_ship = ip + '/gatewayapi/fxcw/shipmShipinfo/getShipList';
 let response, sqlstr, params;
 
-// getShipList();  //更新船舶列表
 
 //获取某个时间点之后一星期内的数据
 router.get('/getPumpHistoryList', function(req, res) {
@@ -59,8 +57,8 @@ router.get('/getPumpHistoryList', function(req, res) {
 //获取某个编号的船舶信息
 router.get('/getShipInfo', function(req, res) {
   sqlstr = "getShipInfo";
-  params = {sno: shipID};
-  //console.log("params:", params);
+  params = {sno: req.query.shipID};
+  console.log("params:", params);
   db.excuteProc(sqlstr, params, function(err, data){
     if (err) {
       console.log(err);
@@ -108,6 +106,7 @@ router.get('/getSendData', function(req, res) {
 });
 
 async function getShipList(){
+  console.log("ok")
   let rec = "";
   axios.get(url_ship)
   .then(response => {
@@ -226,7 +225,8 @@ const job = schedule.scheduleJob({rule: '/10 * * * * *' }, async function(){
 setInterval(async function() {
   // 每隔一段时间执行的代码
   let re = await sendData();
+  // let re = await getShipList();
   // console.log("scheduleJob log:", re, new Date());
-}, 1000 * 30);
+}, 1000 * 60);
 
 module.exports = router;
