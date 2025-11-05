@@ -12,7 +12,7 @@ var downloadHome = './users/public/';
 
 const ip = 'https://fxpt.fxcw.com:8023';
 // const url = ip + '/gatewayapi/fxcw/energyConsumptionData/add1';
-const url = 'http://43.242.96.5:8023/gatewayapi/fxcw/fuelRefuel/add';
+const url = 'https://fxcw-dev.hifleet.com:8023/gatewayapi/fxcw/fuelRefuel/add';
 const url_ship = ip + '/gatewayapi/fxcw/shipmShipinfo/getShipList';
 let response, sqlstr, params;
 
@@ -59,7 +59,7 @@ router.get('/getPumpHistoryList', function(req, res) {
 router.get('/getShipInfo', function(req, res) {
   sqlstr = "getShipInfo";
   params = {sno: req.query.shipID};
-  console.log("params:", params);
+  // console.log("params:", params);
   db.excuteProc(sqlstr, params, function(err, data){
     if (err) {
       console.log(err);
@@ -120,7 +120,7 @@ async function getShipList(){
       // console.log(re.length, re);
       for (var i in re){
         let params1 = { sno: re[i]["id"], shipName: re[i]["shipName"] };
-        console.log(i, params1);
+        // console.log(i, params1);
         db.excuteProc(sqlstr1, params1, function (err, data) {
           if (err) {
             console.log(err);
@@ -169,7 +169,7 @@ async function sendData(){
           param = {"data":data.recordset};
           qty = data.recordset.length;
           // 发送数据
-          // console.log("params1:", sendID, qty);
+          // console.log("params1:", sendID, qty, url, param);
           await axios.post(url, param) //test
           .then(response => {
             let s = response.data.success;
@@ -184,7 +184,7 @@ async function sendData(){
             }
           })
           .catch(error => {
-            // console.error(error);
+            console.error("Send error:", error);
             msg = "发送出错";
           });
         }
