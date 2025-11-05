@@ -7,7 +7,7 @@ const config = {
   server: process.env.NODE_ENV_DB,
   //server: 'iZ8ccky8b15s0lZ\\ELEARNINGSQL2012',
   database: 'ship',
-  port: 14333,
+  port: 1433,
   options: {
     encrypt: false
   },
