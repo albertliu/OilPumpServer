@@ -12,7 +12,8 @@ const shell = require('shelljs');
 var downloadHome = './users/public/';
 
 const ip = 'https://fxpt.fxcw.com:8023';
-const url = ip + '/gatewayapi/fxcw/energyConsumptionData/add';
+// const url = ip + '/gatewayapi/fxcw/energyConsumptionData/add';
+const url = 'http://43.242.96.5:8023/gatewayapi/fxcw/fuelRefuel/add';
 const url_ship = ip + '/gatewayapi/fxcw/shipmShipinfo/getShipList';
 let response, sqlstr, params;
 
