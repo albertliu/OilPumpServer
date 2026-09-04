@@ -1,5 +1,5 @@
-D:
-cd D:\project\ship\OilPumpServer
-forever start -a --max_old_space_size=8096 ./bin/www
+@echo off
+cd /d D:\project\ship\OilPumpServer
+pm2 start ecosystem.config.js
 
 

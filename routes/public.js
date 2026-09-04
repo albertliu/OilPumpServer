@@ -1,6 +1,8 @@
+// version: 260909
 let express = require('express');
 let router = express.Router();
 const axios = require('axios');
+const crypto = require('crypto');
 const schedule = require('node-schedule');
 let xlsx = require('xlsx');
 const db = require("../utils/mssqldb");
@@ -11,10 +13,34 @@ const shell = require('shelljs');
 var downloadHome = './users/public/';
 
 const ip = 'https://fxpt.fxcw.com:8023';
-const url = ip + '/gatewayapi/fxcw/fuelRefuel/add';
-// const url = 'https://fxcw-dev.hifleet.com:8023/gatewayapi/fxcw/fuelRefuel/add';
+// const ip = 'https://fxcw-dev.hifleet.com:8023';
+// const url = ip + '/gatewayapi/fxcw/fuelRefuel/add';
+const url = ip + '/gatewayapi/fxcw/fuelRefuel/encryptedAdd';
 const url_ship = ip + '/gatewayapi/fxcw/shipmShipinfo/getShipList';
 let response, sqlstr, params;
+const fxcwAppId = process.env.NODE_ENV_FXCW_APP_ID;
+const fxcwAesKey = Buffer.from(
+  process.env.NODE_ENV_FXCW_AES_KEY,
+  'base64'
+);
+
+if (fxcwAesKey.length !== 32) {
+  throw new Error('NODE_ENV_FXCW_AES_KEY 必须是 Base64 编码的 32 字节 AES-256 密钥');
+}
+
+function encryptFxcwPayload(data, timestamp, nonce) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', fxcwAesKey, iv);
+  cipher.setAAD(Buffer.from(`${timestamp}|${nonce}`, 'utf8'));
+
+  const ciphertext = Buffer.concat([
+    cipher.update(JSON.stringify(data), 'utf8'),
+    cipher.final()
+  ]);
+  const authTag = cipher.getAuthTag();
+
+  return Buffer.concat([iv, ciphertext, authTag]).toString('base64');
+}
 
 
 //获取某个时间点之后一星期内的数据
@@ -137,7 +163,7 @@ async function getShipList(){
   });
   return rec;
 }
-
+// sendData();
 async function sendData(){
   let re = 0;
   let qty = 0;
@@ -168,24 +194,33 @@ async function sendData(){
         if(data?.recordset && data.recordset.length>0){
           param = {"data":data.recordset};
           qty = data.recordset.length;
+          const timestamp = Date.now().toString();
+          const nonce = crypto.randomUUID();
+          const payload = encryptFxcwPayload(param, timestamp, nonce);
           // 发送数据
-          // console.log("params1:", sendID, qty, url, param);
-          await axios.post(url, param) //test
+          // console.log("params1, payload:", url, param, payload);
+          await axios.post(url, {payload}, {
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'X-App-Id': fxcwAppId,
+              'X-Timestamp': timestamp,
+              'X-Nonce': nonce
+            }
+          })
           .then(response => {
-            let s = response.data.success;
-            msg = response.data.message;
-            // console.log("post result:", s, response.data);
-            if(s){
+            const code = response.data.code;
+            msg = response.data.message || code || '';
+            // console.log("post result:", code, msg, response.data);
+            if(code === 'H200'){
               re = 1;
-              msg = "发送成功";
             }else{
               re = 0;
-              msg = "发送失败";
             }
           })
           .catch(error => {
-            console.error("Send error:", error);
-            msg = "发送出错";
+            console.error(error);
+            re = 2;
+            msg = error.response?.data?.message || error.message || "发送出错";
           });
         }
 

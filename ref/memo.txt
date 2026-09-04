@@ -1,0 +1,33 @@
+1. 更新node版本：在官网下载.msi文件直接更新
+2. 无法加载文件 C:\Program Files\nodejs\npm.ps1,因为在此系统上禁止运行脚本：右键以管理员身份运行powershell
+执行命令：Set-ExecutionPolicy RemoteSigned
+
+npm install -g pm2
+安装 pm2-logrotate 模块
+pm2 install pm2-logrotate
+设置单个日志文件上限为 100MB
+pm2 set pm2-logrotate:max_size 10M
+设置保留的日志文件总数为 30 个
+pm2 set pm2-logrotate:retain 30
+验证配置
+pm2 conf pm2-logrotate
+重启Node.js 应用才能完全生效
+
+环境变量
+NODE_ENV_FXCW_APP_ID ： partner-collect
+NODE_ENV_FXCW_AES_KEY : F5HvGUb9vt8YCjgagzADIIHZdZjB3gA33CAb3OcnJiA=
+
+配置自动启动：
+    以管理员身份运行 PowerShell 或 CMD
+    # 1. 确保你的应用已经在 PM2 中运行并保存
+    pm2 start ecosystem.config.js
+    pm2 save
+
+    # 2. 全局安装自启动包
+    npm install pm2-windows-startup -g
+
+    # 3. 安装开机启动项  计算机\HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run 会创建一个PM2 Startup 的项
+    pm2-startup install
+
+    每次开机都会自动恢复 PM2 之前 # 1保存的应用列表
+    去除windows startup启动项里的相关项目。
