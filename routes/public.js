@@ -12,7 +12,7 @@ const { NetworkAuthenticationRequire } = require('http-errors');
 const shell = require('shelljs');
 var downloadHome = './users/public/';
 
-const ip = 'https://fxpt.fxcw.com:8023';
+const ip = 'https://fxpt.fxcw.com:8025';
 // const ip = 'https://fxcw-dev.hifleet.com:8023';
 // const url = ip + '/gatewayapi/fxcw/fuelRefuel/add';
 const url = ip + '/gatewayapi/fxcw/fuelRefuel/encryptedAdd';
